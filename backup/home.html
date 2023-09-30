@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Barbarian Adventure</title>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                // Poll the server every 5 seconds to get updated gold amount
+                function updateGold() {
+                    $.get("/get_gold", function(data) {
+                        $("#goldDisplay").text("Gold: " + data);
+                    });
+                }
+                setInterval(updateGold, 5000); // Update every 5 seconds
+            });
+        </script>
+    </head>
+    <body>
+        <h1>Barbarian Adventure</h1>
+        <p id="goldDisplay">Gold: {{ barbarian.gold }}</p>
+        <p>Experience: {{ barbarian.experience }}</p>
+        <p>Level: {{ barbarian.level }}</p>
+        <p>Items: {{ barbarian.inventory | join(', ') }}</p>
+
+        <form action="{{ url_for('adventure') }}" method="post">
+            <input type="submit" value="Go on an adventure">
+        </form>
+
+        <form action="{{ url_for('toggle_auto_adventure') }}" method="post">
+            <input type="submit" value="{{ 'Disable Auto Adventure' if barbarian.auto_adventure else 'Enable Auto Adventure' }}">
+        </form>
+
+        <h2>Shop</h2>
+        {% for item, price in shop.items() %}
+            <div>
+                <strong>{{ item.replace('_', ' ').capitalize() }}:</strong> {{ price }} gold
+                <form action="{{ url_for('buy', item=item) }}" method="post">
+                    <input type="submit" value="Buy {{ item.replace('_', ' ').capitalize() }}">
+                </form>
+            </div>
+        {% endfor %}
+    </body>
+</html>
