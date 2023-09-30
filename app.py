@@ -5,7 +5,7 @@ import time
 
 from flask import Flask, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required, login_user
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from items_generator import generate_random_item
 
@@ -166,6 +166,23 @@ def login():
     return render_template("login.html")
 
 
+@app.route("/create_user", methods=["POST"])
+def create_user():
+    username = request.form.get("username")
+    password = request.form.get("password")
+
+    conn = sqlite3.connect("game.db")
+    c = conn.cursor()
+    c.execute(
+        "INSERT INTO player (username, password) VALUES (?, ?)",
+        (username, generate_password_hash(password)),
+    )
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("login"))
+
+
 @app.route("/login", methods=["POST"])
 def login_post():
     username = request.form.get("username")
@@ -177,7 +194,10 @@ def login_post():
     user = c.fetchone()
     conn.close()
 
-    if not user or not check_password_hash(user.password, password):
+    if not user:
+        flash("User does not exist. Please create a new account.")
+        return redirect(url_for("create_user"))
+    elif not check_password_hash(user[1], password):
         flash("Please check your login details and try again.")
         return redirect(url_for("login"))
 
