@@ -1,13 +1,16 @@
+import os
 import random
 import sqlite3
 import time
 
-from flask import Flask, redirect, render_template, session, url_for
+from flask import Flask, flash, redirect, render_template, request, session, url_for
+from flask_login import current_user, login_required, login_user
+from werkzeug.security import check_password_hash
 
 from items_generator import generate_random_item
 
 app = Flask(__name__)
-app.secret_key = "super secret key"
+app.secret_key = os.urandom(24)
 
 MAX_GOLD_VALUE = 10**12  # Set a maximum limit for gold
 
@@ -73,6 +76,7 @@ def calculate_and_simulate_adventures(barbarian):
 
 
 @app.route("/")
+@login_required
 def home():
     default_barbarian = {
         "gold": 0,
@@ -89,7 +93,7 @@ def home():
     if "id" not in barbarian:
         conn = sqlite3.connect("game.db")
         c = conn.cursor()
-        c.execute("SELECT id FROM player WHERE username = ?", (session["username"],))
+        c.execute("SELECT id FROM player WHERE username = ?", (current_user.username,))
         barbarian["id"] = c.fetchone()[0]
         conn.close()
 
@@ -157,25 +161,29 @@ def get_xp():
     return str(barbarian["experience"])
 
 
-@app.route("/reset_game", methods=["POST"])
-def reset_game():
-    session.clear()
+@app.route("/login", methods=["GET"])
+def login():
+    return render_template("login.html")
+
+
+@app.route("/login", methods=["POST"])
+def login_post():
+    username = request.form.get("username")
+    password = request.form.get("password")
+
+    conn = sqlite3.connect("game.db")
+    c = conn.cursor()
+    c.execute("SELECT * FROM player WHERE username = ?", (username,))
+    user = c.fetchone()
+    conn.close()
+
+    if not user or not check_password_hash(user.password, password):
+        flash("Please check your login details and try again.")
+        return redirect(url_for("login"))
+
+    login_user(user)
     return redirect(url_for("home"))
 
 
-@app.route("/reset_database", methods=["POST"])
-def reset_database():
-    # Code to reset the SQLite database goes here
-    # This could involve deleting the current session data or dropping and recreating tables, depending on your implementation
-    conn = sqlite3.connect("game.db")
-    c = conn.cursor()
-    c.execute("ALTER TABLE player ADD COLUMN items TEXT")
-    conn.commit()
-    conn.close()
-    return "Database reset"
-    session.clear()
-    return "Database reset"
-
-
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)
