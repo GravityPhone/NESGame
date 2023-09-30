@@ -4,13 +4,16 @@ import sqlite3
 import time
 
 from flask import Flask, flash, redirect, render_template, request, session, url_for
-from flask_login import current_user, login_required, login_user
+from flask_login import LoginManager, current_user, login_required, login_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from items_generator import generate_random_item
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
+
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 MAX_GOLD_VALUE = 10**12  # Set a maximum limit for gold
 
