@@ -85,6 +85,14 @@ def home():
 
     barbarian = session.get("barbarian", default_barbarian)
 
+    # Check if 'id' key is in the barbarian dictionary
+    if "id" not in barbarian:
+        conn = sqlite3.connect("game.db")
+        c = conn.cursor()
+        c.execute("SELECT id FROM player WHERE username = ?", (session["username"],))
+        barbarian["id"] = c.fetchone()[0]
+        conn.close()
+
     if barbarian["auto_adventure"]:
         calculate_and_simulate_adventures(barbarian)
 
@@ -99,6 +107,11 @@ def adventure():
     barbarian = session.get("barbarian")
     go_on_adventure(barbarian)
     session["barbarian"] = barbarian
+
+    # Check if 'id' key is in the barbarian dictionary
+    if "id" not in barbarian:
+        return "Error: Player's id could not be found."
+
     conn = sqlite3.connect("game.db")
     c = conn.cursor()
     c.execute(
