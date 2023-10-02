@@ -60,6 +60,7 @@ class Shop:
             barbarian["items"].append(item)
             return f"Bought a {item.replace('_', ' ')}!"
         else:
+            return f"Cannot buy {item.replace('_', ' ')} due to insufficient gold or item not available."
 @app.route("/home")
 
 
