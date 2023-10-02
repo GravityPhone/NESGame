@@ -59,7 +59,7 @@ class Shop:
             barbarian["items"].append(item)
             return f"Bought a {item.replace('_', ' ')}!"
         else:
-            return "Transaction failed. Either the item doesn't exist or you don't have enough gold."
+@app.route("/home")
 
 
 def go_on_adventure(barbarian):
@@ -105,34 +105,11 @@ def calculate_and_simulate_adventures(barbarian):
 
 
 @app.route("/")
-@login_required
-def home():
-    default_barbarian = {
-        "gold": 0,
-        "experience": 0,
-        "level": 1,
-        "items": [],
-        "auto_adventure": False,
-        "last_adventure_time": time.time(),
-    }
-
-    barbarian = session.get("barbarian", default_barbarian)
-
-    # Check if 'id' key is in the barbarian dictionary
-    if "id" not in barbarian:
-        conn = sqlite3.connect("game.db")
-        c = conn.cursor()
-        c.execute("SELECT id FROM player WHERE username = ?", (current_user.username,))
-        barbarian["id"] = c.fetchone()[0]
-        conn.close()
-
-    if barbarian["auto_adventure"]:
-        calculate_and_simulate_adventures(barbarian)
-
-    session["barbarian"] = barbarian
-    return render_template(
-        "home.html", barbarian=barbarian, shop=Shop().items, items=barbarian["items"]
-    )
+def root():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    else:
+        return redirect(url_for('login'))
 
 
 @app.route("/adventure", methods=["POST"])
@@ -190,7 +167,7 @@ def get_xp():
     return str(barbarian["experience"])
 
 
-@app.route("/", methods=["GET"])
+@app.route("/login", methods=["GET"])
 def login():
     return render_template("login.html")
 
