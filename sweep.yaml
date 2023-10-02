@@ -13,9 +13,6 @@ description: 'This is a Flask web idle game in the tradition of games like Cooki
 
 sandbox:
   install:
-    - apt install python3.11 -y
-    - pip install poetry
-    - poetry env use python3.11
-    - poetry install
+    - pip install -r requirements.txt
   check:
-    - poetry run pylint --errors-only {file_path}
+    - pylint --errors-only {file_path}
