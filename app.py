@@ -4,7 +4,13 @@ import sqlite3
 import time
 
 from flask import Flask, flash, redirect, render_template, request, session, url_for
-from flask_login import LoginManager, current_user, login_required, login_user
+from flask_login import (
+    LoginManager,
+    UserMixin,
+    current_user,
+    login_required,
+    login_user,
+)
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from items_generator import generate_random_item
@@ -14,6 +20,26 @@ app.secret_key = os.urandom(24)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+
+class User(UserMixin):
+    def __init__(self, id, username, password):
+        self.id = id
+        self.username = username
+        self.password = password
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    conn = sqlite3.connect("game.db")
+    c = conn.cursor()
+    c.execute("SELECT * FROM player WHERE id = ?", (user_id,))
+    user = c.fetchone()
+    conn.close()
+    if user:
+        return User(id=user[0], username=user[1], password=user[2])
+    return None
+
 
 MAX_GOLD_VALUE = 10**12  # Set a maximum limit for gold
 
