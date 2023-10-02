@@ -19,6 +19,7 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
 login_manager = LoginManager()
+login_manager.login_view = 'login'
 login_manager.init_app(app)
 
 
@@ -167,7 +168,7 @@ def get_xp():
     return str(barbarian["experience"])
 
 
-@app.route("/login", methods=["GET"])
+@app.route("/login", methods=["GET", "POST"])
 def login():
     return render_template("login.html")
 
