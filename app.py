@@ -190,7 +190,7 @@ def get_xp():
     return str(barbarian["experience"])
 
 
-@app.route("/login", methods=["GET"])
+@app.route("/", methods=["GET"])
 def login():
     return render_template("login.html")
 
@@ -230,7 +230,7 @@ def login_post():
         flash("Please check your login details and try again.")
         return redirect(url_for("login"))
 
-    login_user(user)
+    login_user(User(id=user[0], username=user[1], password=user[2]))
     return redirect(url_for("home"))
 
 
