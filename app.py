@@ -207,6 +207,9 @@ def create_user():
     username = request.form.get("username")
     password = request.form.get("password")
 
+    if username is None or password is None:
+        return "Error: Username or password cannot be empty."
+
     conn = sqlite3.connect("game.db")
     c = conn.cursor()
     c.execute(
