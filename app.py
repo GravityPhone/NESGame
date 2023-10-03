@@ -269,7 +269,11 @@ def login_post():
         "auto_adventure": user[7],
         "last_adventure_time": user[8],
     }
-    return redirect(url_for("home"))
+    if current_user.is_authenticated:
+        return redirect(url_for("home"))
+    else:
+        flash("Invalid login credentials. Please try again.")
+        return redirect(url_for("login"))
 
 
 if __name__ == "__main__":
