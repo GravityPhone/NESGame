@@ -210,10 +210,23 @@ def create_user():
         "INSERT INTO player (username, password, gold, experience, level, items, auto_adventure, last_adventure_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
         (username, generate_password_hash(password), 0, 0, 1, "[]", 0, time.time()),
     )
+    user_id = c.lastrowid
     conn.commit()
     conn.close()
 
-    return redirect(url_for("login"))
+    user = User(id=user_id, username=username, password=password)
+    login_user(user)
+    session["barbarian"] = {
+        "id": user_id,
+        "username": username,
+        "gold": 0,
+        "experience": 0,
+        "level": 1,
+        "items": [],
+        "auto_adventure": 0,
+        "last_adventure_time": time.time(),
+    }
+    return redirect(url_for("home"))
 
 
 @app.route("/login", methods=["POST"])
@@ -228,7 +241,6 @@ def login_post():
     conn.close()
 
     if not user:
-        flash("User does not exist. Please create a new account.")
         return redirect(url_for("create_user"))
     elif not check_password_hash(user[2], password):
         flash("Please check your login details and try again.")
