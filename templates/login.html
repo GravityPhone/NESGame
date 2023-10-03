@@ -16,12 +16,17 @@
     <h2>Create New User</h2>
     <div id="create_user_error_messages" style="color: red;"></div>
     <form method="POST" action="/create_user">
-      <label for="new_username">Username:</label><br />
-      <input type="text" id="new_username" name="new_username" required /><br />
-      <label for="new_password">Password:</label><br />
-      <input
-        type="password"
-        id="new_password"
+    <label for="new_username">Username:</label><br />
+    <input type="text" id="new_username" name="new_username" required /><br />
+    <label for="new_password">Password:</label><br />
+    <input
+    type="password"
+    id="new_password"
+    name="new_password"
+    required
+    /><br />
+    <input type="submit" value="Create User" />
+    </form>
         name="new_password"
         required
       /><br />
