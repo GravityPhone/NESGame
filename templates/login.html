@@ -5,6 +5,7 @@
   </head>
   <body>
     <h2>Login</h2>
+    <div id="error_messages" style="color: red;"></div>
     <form method="POST" action="/login">
       <label for="username">Username:</label><br />
       <input type="text" id="username" name="username" required /><br />
@@ -13,6 +14,7 @@
       <input type="submit" value="Login" />
     </form>
     <h2>Create New User</h2>
+    <div id="create_user_error_messages" style="color: red;"></div>
     <form method="POST" action="/create_user">
       <label for="new_username">Username:</label><br />
       <input type="text" id="new_username" name="new_username" required /><br />
