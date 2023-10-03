@@ -109,6 +109,22 @@ def calculate_and_simulate_adventures(barbarian):
 @app.route("/")
 def root():
     if current_user.is_authenticated:
+        conn = sqlite3.connect("game.db")
+        c = conn.cursor()
+        c.execute("SELECT * FROM player WHERE id = ?", (current_user.id,))
+        user = c.fetchone()
+        conn.close()
+        if user:
+            session["barbarian"] = {
+                "id": user[0],
+                "username": user[1],
+                "gold": user[3],
+                "experience": user[4],
+                "level": user[5],
+                "items": eval(user[6]),
+                "auto_adventure": user[7],
+                "last_adventure_time": user[8],
+            }
         return redirect(url_for('home'))
     else:
         return redirect(url_for('login'))
@@ -127,8 +143,8 @@ def adventure():
     conn = sqlite3.connect("game.db")
     c = conn.cursor()
     c.execute(
-        "UPDATE player SET items = ? WHERE id = ?",
-        (str(barbarian["items"]), barbarian["id"]),
+        "UPDATE player SET gold = ?, experience = ?, level = ?, items = ? WHERE id = ?",
+        (barbarian["gold"], barbarian["experience"], barbarian["level"], str(barbarian["items"]), barbarian["id"]),
     )
     conn.commit()
     conn.close()
@@ -141,6 +157,15 @@ def buy(item):
     shop = Shop()
     shop.buy(item, barbarian)
     session["barbarian"] = barbarian
+
+    conn = sqlite3.connect("game.db")
+    c = conn.cursor()
+    c.execute(
+        "UPDATE player SET gold = ?, items = ? WHERE id = ?",
+        (barbarian["gold"], str(barbarian["items"]), barbarian["id"]),
+    )
+    conn.commit()
+    conn.close()
     return redirect(url_for("home"))
 
 
@@ -182,8 +207,8 @@ def create_user():
     conn = sqlite3.connect("game.db")
     c = conn.cursor()
     c.execute(
-        "INSERT INTO player (username, password) VALUES (?, ?)",
-        (username, generate_password_hash(password)),
+        "INSERT INTO player (username, password, gold, experience, level, items, auto_adventure, last_adventure_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        (username, generate_password_hash(password), 0, 0, 1, "[]", 0, time.time()),
     )
     conn.commit()
     conn.close()
@@ -205,11 +230,21 @@ def login_post():
     if not user:
         flash("User does not exist. Please create a new account.")
         return redirect(url_for("create_user"))
-    elif not check_password_hash(user[1], password):
+    elif not check_password_hash(user[2], password):
         flash("Please check your login details and try again.")
         return redirect(url_for("login"))
 
     login_user(User(id=user[0], username=user[1], password=user[2]))
+    session["barbarian"] = {
+        "id": user[0],
+        "username": user[1],
+        "gold": user[3],
+        "experience": user[4],
+        "level": user[5],
+        "items": eval(user[6]),
+        "auto_adventure": user[7],
+        "last_adventure_time": user[8],
+    }
     return redirect(url_for("home"))
 
 
