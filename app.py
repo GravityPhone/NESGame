@@ -29,6 +29,9 @@ class User(UserMixin):
         self.username = username
         self.password = password
 
+    def get_id(self):
+        return self.id
+
 
 @login_manager.user_loader
 def load_user(user_id):
