@@ -221,7 +221,7 @@ def create_user():
     conn.commit()
     conn.close()
 
-    user = User(id=user_id, username=username, password=password)
+    user = User(id=user_id, username=username, password=generate_password_hash(password))
     login_user(user)
     session["barbarian"] = {
         "id": user_id,
@@ -258,7 +258,7 @@ def login_post():
         flash("Please check your login details and try again.")
         return redirect(url_for("login"))
 
-    login_user(User(id=user[0], username=user[1], password=password))
+    login_user(User(id=user[0], username=user[1], password=generate_password_hash(password)))
     session["barbarian"] = {
         "id": user[0],
         "username": user[1],
