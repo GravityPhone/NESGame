@@ -17,3 +17,7 @@ sandbox:
     - pip install -r requirements.txt
   check:
     - pylint --errors-only {file_path}
+
+ rules:
+ - There should not be commented out code.
+ - Make sure all error logs use traceback and any unnecessary info logs are deleted.
