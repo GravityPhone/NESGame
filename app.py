@@ -258,7 +258,7 @@ def login_post():
         flash("Please check your login details and try again.")
         return redirect(url_for("login"))
 
-    login_user(User(id=user[0], username=user[1], password=user[2]))
+    login_user(User(id=user[0], username=user[1], password=password))
     session["barbarian"] = {
         "id": user[0],
         "username": user[1],
