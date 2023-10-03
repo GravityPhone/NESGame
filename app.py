@@ -207,8 +207,9 @@ def create_user():
     username = request.form.get("username")
     password = request.form.get("password")
 
-    if username is None or password is None:
-        return "Error: Username or password cannot be empty."
+    if not username or not password:
+        flash("Error: Username or password cannot be empty.")
+        return redirect(url_for("login"))
 
     conn = sqlite3.connect("game.db")
     c = conn.cursor()
@@ -232,13 +233,18 @@ def create_user():
         "auto_adventure": 0,
         "last_adventure_time": time.time(),
     }
-    return redirect(url_for("home"))
+    flash("User created successfully. Please login.")
+    return redirect(url_for("login"))
 
 
 @app.route("/login", methods=["POST"])
 def login_post():
     username = request.form.get("username")
     password = request.form.get("password")
+
+    if not username or not password:
+        flash("Error: Username or password cannot be empty.")
+        return redirect(url_for("login"))
 
     conn = sqlite3.connect("game.db")
     c = conn.cursor()
